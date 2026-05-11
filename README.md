@@ -11,7 +11,7 @@ Flux при поднятии подтягивает все манифесты и
 
 | Слой | Инструмент |
 |------|-----------|
-| Provisioning | Terraform + Yandex Cloud provider |
+| Provisioning | Yandex Cloud Console (Managed K8s) |
 | GitOps | Flux v2 |
 | CNI | Yandex Cloud CNI (встроен в Managed K8s) |
 | Ingress | ingress-nginx (HelmRelease) |
@@ -24,7 +24,6 @@ Flux при поднятии подтягивает все манифесты и
 
 ```
 casego-gitops/
-├── terraform/              # Cluster lifecycle
 ├── clusters/prod/          # Точка входа Flux
 ├── infrastructure/         # Ingress, cert-manager, SOPS
 ├── apps/                   # Сервисы CaseGo + БД
@@ -34,18 +33,22 @@ casego-gitops/
 
 ## Жизненный цикл
 
-```bash
-# Поднять (≈ 5-7 минут)
-./scripts/bootstrap.sh
+Кластер `casego-cluster` создан в консоли Yandex Cloud. Управление:
 
-# Удалить
-./scripts/teardown.sh
+```bash
+# Удалить (когда не нужен)
+yc managed-kubernetes cluster delete --name casego-cluster
+
+# Создать обратно — через консоль или yc CLI с теми же параметрами
+# После пересоздания: ./scripts/bootstrap.sh поднимет Flux,
+# который сам подтянет Ingress, cert-manager и приложения из Git
+./scripts/bootstrap.sh
 ```
 
 ## Фазы внедрения
 
 - [x] **Фаза 0** — Структура репозитория (этот шаг)
 - [ ] **[Фаза 1](docs/phase-1-prerequisites.md)** — Установка CLI и онбординг в Yandex Cloud
-- [ ] **[Фаза 2](docs/phase-2-terraform.md)** — Terraform поднимает пустой кластер
+- [ ] **[Фаза 2](docs/phase-2-cluster-access.md)** — Подключение kubectl к casego-cluster
 - [ ] **[Фаза 3](docs/phase-3-flux.md)** — Flux + Ingress + cert-manager + SOPS
 - [ ] **[Фаза 4](docs/phase-4-apps.md)** — Манифесты приложений CaseGo
