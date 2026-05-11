@@ -1,0 +1,38 @@
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# SOPS / age — private keys NEVER in git
+*.age
+age.key
+age-key.txt
+.sops-age.key
+key.txt
+
+# Kubeconfig
+kubeconfig
+kubeconfig.yaml
+*.kubeconfig
+
+# Local
+.envrc
+.env
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Flux
+.flux/

@@ -1,0 +1,10 @@
+# SOPS правила шифрования
+# Шифруем только секреты в apps/secrets/ и infrastructure/**/secrets/
+# age public key подставляется в Фазе 3 после генерации ключа
+creation_rules:
+  - path_regex: apps/secrets/.*\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    # age: REPLACE_WITH_AGE_PUBLIC_KEY
+  - path_regex: infrastructure/.*/secrets/.*\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    # age: REPLACE_WITH_AGE_PUBLIC_KEY
