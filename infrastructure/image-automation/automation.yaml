@@ -19,9 +19,9 @@ spec:
       messageTemplate: |
         chore(images): update via Flux image automation
 
-        Images:
-        {{ range $image, $_ := .Updated.Images -}}
-        - {{ $image }}
+        Changes:
+        {{ range $filename, $_ := .Changed.FileChanges -}}
+        - {{ $filename }}
         {{ end -}}
     push:
       branch: main
