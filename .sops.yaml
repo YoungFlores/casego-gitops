@@ -4,7 +4,7 @@
 creation_rules:
   - path_regex: apps/secrets/.*\.yaml$
     encrypted_regex: ^(data|stringData)$
-    # age: REPLACE_WITH_AGE_PUBLIC_KEY
+    age: age1l3mp8ahupqmw9kjk4gcy2z4apd0rkvps36w443ne7rvfc6u7p54qln9aeu
   - path_regex: infrastructure/.*/secrets/.*\.yaml$
     encrypted_regex: ^(data|stringData)$
-    # age: REPLACE_WITH_AGE_PUBLIC_KEY
+    age: age1l3mp8ahupqmw9kjk4gcy2z4apd0rkvps36w443ne7rvfc6u7p54qln9aeu
