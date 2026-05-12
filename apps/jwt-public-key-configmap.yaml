@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jwt-public-key
+  namespace: casego-apps
+data:
+  PUBLIC_KEY: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApH2Y+Gl56+TilGYLlWT7\nTnA/72Ymyw/BLZCEwwk3Om7Prx6QKPJ3I4uL5ZH+PfFhKdtO+vRKkpOfqj8y4nKf\nQOZyazIW8/4bpX5p4bf0xnOaZNv2zHuuCAapdhlVWHWH4aB8SlPZxBPxU5XANJQ7\n+/s2ezTLIZYStK0WMYMo3NJCTw5wszSukMRT+V9iJwJKQirJBrjgx74P/gxaDNtE\nUBxKENbhe1qTwt+KEZeRefyVIEDAeR3iuSeghZkzHV4M1o+iHYOZ0ajlHeD8iTUW\nfN8zK6Z+NPkdSvk26AeMqJvJa/AkP2WXmwqOEEqAtZffRqmIXOS7LMBE6HLyMAl0\npQIDAQAB\n-----END PUBLIC KEY-----"
