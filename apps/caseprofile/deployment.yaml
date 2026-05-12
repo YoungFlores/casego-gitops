@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: caseprofile
-          image: ghcr.io/sewaustav/casego-caseprofile:latest
+          image: ghcr.io/sewaustav/casego-caseprofile:latest # {"$imagepolicy": "flux-system:casego-caseprofile"}
           imagePullPolicy: Always
           ports:
             - name: http

@@ -1,0 +1,45 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: casego-auth
+  namespace: flux-system
+spec:
+  image: ghcr.io/sewaustav/casego-auth
+  interval: 1m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: casego-profile
+  namespace: flux-system
+spec:
+  image: ghcr.io/sewaustav/casego-profile
+  interval: 1m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: casego-casego
+  namespace: flux-system
+spec:
+  image: ghcr.io/sewaustav/casego-casego
+  interval: 1m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: casego-caseprofile
+  namespace: flux-system
+spec:
+  image: ghcr.io/sewaustav/casego-caseprofile
+  interval: 1m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: casego-payment
+  namespace: flux-system
+spec:
+  image: ghcr.io/sewaustav/casego-payment
+  interval: 1m

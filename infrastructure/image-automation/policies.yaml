@@ -1,0 +1,75 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: casego-auth
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: casego-auth
+  filterTags:
+    pattern: '^main-(?P<sha>.+)$'
+    extract: '$sha'
+  policy:
+    alphabetical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: casego-profile
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: casego-profile
+  filterTags:
+    pattern: '^main-(?P<sha>.+)$'
+    extract: '$sha'
+  policy:
+    alphabetical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: casego-casego
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: casego-casego
+  filterTags:
+    pattern: '^main-(?P<sha>.+)$'
+    extract: '$sha'
+  policy:
+    alphabetical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: casego-caseprofile
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: casego-caseprofile
+  filterTags:
+    pattern: '^main-(?P<sha>.+)$'
+    extract: '$sha'
+  policy:
+    alphabetical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: casego-payment
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: casego-payment
+  filterTags:
+    pattern: '^main-(?P<sha>.+)$'
+    extract: '$sha'
+  policy:
+    alphabetical:
+      order: asc

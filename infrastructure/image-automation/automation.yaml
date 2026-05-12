@@ -1,0 +1,30 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImageUpdateAutomation
+metadata:
+  name: image-update
+  namespace: flux-system
+spec:
+  interval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: flux@casego.local
+        name: flux-image-automation
+      messageTemplate: |
+        chore(images): update via Flux image automation
+
+        Images:
+        {{ range $image, $_ := .Updated.Images -}}
+        - {{ $image }}
+        {{ end -}}
+    push:
+      branch: main
+  update:
+    path: ./apps
+    strategy: Setters
