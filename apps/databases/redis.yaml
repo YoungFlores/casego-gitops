@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-casego
+  namespace: casego-apps
+  labels:
+    app: redis-casego
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: redis-casego
+  template:
+    metadata:
+      labels:
+        app: redis-casego
+    spec:
+      containers:
+        - name: redis
+          image: redis:8-alpine
+          args:
+            - redis-server
+            - --requirepass
+            - casego_redis_password
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+          readinessProbe:
+            exec:
+              command: ["redis-cli", "-a", "casego_redis_password", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-casego
+  namespace: casego-apps
+spec:
+  selector:
+    app: redis-casego
+  ports:
+    - port: 6379
+      targetPort: 6379

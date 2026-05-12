@@ -1,0 +1,123 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-casego-init
+  namespace: casego-apps
+data:
+  init.sql: |
+    CREATE TABLE cases (
+        id BIGSERIAL PRIMARY KEY,
+        topic TEXT NOT NULL,
+        category INTEGER NOT NULL,
+        is_generated BOOLEAN NOT NULL DEFAULT FALSE,
+        description TEXT NOT NULL,
+        first_question TEXT NOT NULL,
+        creator BIGINT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE dialogs (
+        id BIGSERIAL PRIMARY KEY,
+        case_id BIGINT NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+        user_id BIGINT NOT NULL,
+        model_name VARCHAR(255),
+        started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        ended_at TIMESTAMP WITH TIME ZONE
+    );
+
+    CREATE TABLE interactions (
+        id BIGSERIAL PRIMARY KEY,
+        dialog_id BIGINT NOT NULL REFERENCES dialogs(id) ON DELETE CASCADE,
+        step INTEGER NOT NULL,
+        question TEXT NOT NULL,
+        answer TEXT NOT NULL,
+        tokens_used INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE results (
+        id BIGSERIAL PRIMARY KEY,
+        case_id BIGINT NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+        user_id BIGINT NOT NULL,
+        dialog_id BIGINT NOT NULL REFERENCES dialogs(id) ON DELETE CASCADE,
+        steps_count INTEGER NOT NULL DEFAULT 0,
+        tokens_used INTEGER NOT NULL DEFAULT 0,
+        finished_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+        assertiveness DOUBLE PRECISION NOT NULL DEFAULT 0,
+        empathy DOUBLE PRECISION NOT NULL DEFAULT 0,
+        clarity_communication DOUBLE PRECISION NOT NULL DEFAULT 0,
+        resistance DOUBLE PRECISION NOT NULL DEFAULT 0,
+        eloquence DOUBLE PRECISION NOT NULL DEFAULT 0,
+        initiative DOUBLE PRECISION NOT NULL DEFAULT 0
+    );
+
+    CREATE INDEX idx_dialogs_case_id ON dialogs(case_id);
+    CREATE INDEX idx_interactions_dialog_id ON interactions(dialog_id);
+    CREATE INDEX idx_results_dialog_id ON results(dialog_id);
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-casego
+  namespace: casego-apps
+  labels:
+    app: postgres-casego
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: postgres-casego
+  template:
+    metadata:
+      labels:
+        app: postgres-casego
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: casego_user
+            - name: POSTGRES_PASSWORD
+              value: casego_password
+            - name: POSTGRES_DB
+              value: casego_db
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "casego_user", "-d", "casego_db"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: init
+          configMap:
+            name: postgres-casego-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-casego
+  namespace: casego-apps
+spec:
+  selector:
+    app: postgres-casego
+  ports:
+    - port: 5432
+      targetPort: 5432
