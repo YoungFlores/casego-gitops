@@ -19,7 +19,6 @@ spec:
       replicaCount: 1
       service:
         type: LoadBalancer
-        loadBalancerIP: 81.26.177.234
         externalTrafficPolicy: Local
       ingressClassResource:
         default: true
