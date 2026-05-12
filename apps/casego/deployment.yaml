@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: casego
+  namespace: casego-apps
+  labels:
+    app: casego
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: casego
+  template:
+    metadata:
+      labels:
+        app: casego
+    spec:
+      containers:
+        - name: casego
+          image: ghcr.io/sewaustav/casego-casego:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8081
+          env:
+            - name: POSTGRES_HOST
+              value: postgres-casego
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: casego_user
+            - name: POSTGRES_PASSWORD
+              value: casego_password
+            - name: POSTGRES_DB
+              value: casego_db
+            - name: REDIS_HOST
+              value: redis-casego
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              value: casego_redis_password
+            - name: GRPC_SEVER
+              value: caseprofile:50051
+            - name: PAYMENT_GRPC_SERVER
+              value: payment:50052
+            - name: PUBLIC_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: jwt-public-key
+                  key: PUBLIC_KEY
+            - name: PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-private-key
+                  key: PRIVATE_KEY
+          envFrom:
+            - secretRef:
+                name: casego-llm
+          volumeMounts:
+            - name: payment-tls
+              mountPath: /app/ca.crt
+              subPath: ca.crt
+              readOnly: true
+            - name: payment-tls
+              mountPath: /app/general-client.crt
+              subPath: general-client.crt
+              readOnly: true
+            - name: payment-tls
+              mountPath: /app/general-client.key
+              subPath: general-client.key
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 384Mi
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: payment-tls
+          secret:
+            secretName: payment-client-tls

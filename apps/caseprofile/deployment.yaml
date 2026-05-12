@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caseprofile
+  namespace: casego-apps
+  labels:
+    app: caseprofile
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: caseprofile
+  template:
+    metadata:
+      labels:
+        app: caseprofile
+    spec:
+      containers:
+        - name: caseprofile
+          image: ghcr.io/sewaustav/casego-caseprofile:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8082
+            - name: grpc
+              containerPort: 50051
+          env:
+            - name: POSTGRES_HOST
+              value: postgres-caseprofile
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: caseprofile_user
+            - name: POSTGRES_PASSWORD
+              value: caseprofile_password
+            - name: POSTGRES_DB
+              value: caseprofile_db
+            - name: PUBLIC_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: jwt-public-key
+                  key: PUBLIC_KEY
+          resources:
+            requests:
+              cpu: 30m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10

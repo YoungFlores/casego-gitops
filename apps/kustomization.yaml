@@ -6,3 +6,7 @@ resources:
   - secrets
   - databases
   - auth
+  - profile
+  - caseprofile
+  - payment
+  - casego

@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: profile
+  namespace: casego-apps
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - profile.111-88-158-206.nip.io
+      secretName: profile-tls
+  rules:
+    - host: profile.111-88-158-206.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: profile
+                port:
+                  number: 8080

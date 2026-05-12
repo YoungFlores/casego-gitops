@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: caseprofile
+  namespace: casego-apps
+spec:
+  selector:
+    app: caseprofile
+  ports:
+    - name: http
+      port: 8082
+      targetPort: http
+    - name: grpc
+      port: 50051
+      targetPort: grpc

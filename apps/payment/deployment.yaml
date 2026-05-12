@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+  namespace: casego-apps
+  labels:
+    app: payment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+        - name: payment
+          image: ghcr.io/sewaustav/casego-payment:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8085
+            - name: grpc
+              containerPort: 50052
+          env:
+            - name: POSTGRES_HOST
+              value: postgres-payment
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: payment_user
+            - name: POSTGRES_PASSWORD
+              value: payment_password
+            - name: POSTGRES_DB
+              value: payment_db
+            - name: PUBLIC_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: jwt-public-key
+                  key: PUBLIC_KEY
+          volumeMounts:
+            - name: tls
+              mountPath: /app/certs
+              readOnly: true
+          resources:
+            requests:
+              cpu: 30m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: tls
+          secret:
+            secretName: payment-server-tls

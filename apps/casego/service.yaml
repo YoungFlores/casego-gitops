@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: casego
+  namespace: casego-apps
+spec:
+  selector:
+    app: casego
+  ports:
+    - port: 8081
+      targetPort: http
