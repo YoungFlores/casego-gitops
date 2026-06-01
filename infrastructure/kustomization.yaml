@@ -4,4 +4,5 @@ resources:
   - sources
   - ingress-nginx
   - cert-manager
+  - metrics-server
   - image-automation
