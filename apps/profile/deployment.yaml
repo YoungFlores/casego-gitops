@@ -48,3 +48,11 @@ spec:
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
+          volumeMounts:
+            - name: tls
+              mountPath: /root/certs
+              readOnly: true
+      volumes:
+        - name: tls
+          secret:
+            secretName: profile-server-tls
