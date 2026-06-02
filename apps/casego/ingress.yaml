@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - casego.111-88-158-206.nip.io
+        - casego.158-160-192-124.nip.io
       secretName: casego-tls
   rules:
-    - host: casego.111-88-158-206.nip.io
+    - host: casego.158-160-192-124.nip.io
       http:
         paths:
           - path: /

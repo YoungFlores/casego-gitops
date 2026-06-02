@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - caseprofile.111-88-158-206.nip.io
+        - caseprofile.158-160-192-124.nip.io
       secretName: caseprofile-tls
   rules:
-    - host: caseprofile.111-88-158-206.nip.io
+    - host: caseprofile.158-160-192-124.nip.io
       http:
         paths:
           - path: /

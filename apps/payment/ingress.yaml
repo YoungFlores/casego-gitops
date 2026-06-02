@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - payment.111-88-158-206.nip.io
+        - payment.158-160-192-124.nip.io
       secretName: payment-tls
   rules:
-    - host: payment.111-88-158-206.nip.io
+    - host: payment.158-160-192-124.nip.io
       http:
         paths:
           - path: /

@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - profile.111-88-158-206.nip.io
+        - profile.158-160-192-124.nip.io
       secretName: profile-tls
   rules:
-    - host: profile.111-88-158-206.nip.io
+    - host: profile.158-160-192-124.nip.io
       http:
         paths:
           - path: /

@@ -10,10 +10,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - auth.111-88-158-206.nip.io
+        - auth.158-160-192-124.nip.io
       secretName: auth-tls
   rules:
-    - host: auth.111-88-158-206.nip.io
+    - host: auth.158-160-192-124.nip.io
       http:
         paths:
           - path: /
