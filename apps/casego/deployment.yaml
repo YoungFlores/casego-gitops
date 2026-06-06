@@ -29,7 +29,10 @@ spec:
             - name: POSTGRES_USER
               value: casego_user
             - name: POSTGRES_PASSWORD
-              value: casego_password
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: POSTGRES_CASEGO_PASSWORD
             - name: POSTGRES_DB
               value: casego_db
             - name: REDIS_HOST
@@ -37,7 +40,10 @@ spec:
             - name: REDIS_PORT
               value: "6379"
             - name: REDIS_PASSWORD
-              value: casego_redis_password
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: REDIS_PASSWORD
             - name: GRPC_SEVER
               value: caseprofile:50051
             - name: PAYMENT_GRPC_SERVER

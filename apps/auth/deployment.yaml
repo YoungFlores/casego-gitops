@@ -45,7 +45,10 @@ spec:
             - name: POSTGRES_USER
               value: auth_user
             - name: POSTGRES_PASSWORD
-              value: auth_strong_password
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: POSTGRES_AUTH_PASSWORD
             - name: POSTGRES_DB
               value: auth_db
             - name: REDIS_HOST
@@ -55,7 +58,10 @@ spec:
             - name: REDIS_DB
               value: "0"
             - name: REDIS_PASSWORD
-              value: casego_redis_password
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: REDIS_PASSWORD
             - name: REDIS_TTL
               value: "3600"
           envFrom:

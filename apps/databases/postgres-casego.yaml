@@ -84,7 +84,10 @@ spec:
             - name: POSTGRES_USER
               value: casego_user
             - name: POSTGRES_PASSWORD
-              value: casego_password
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: POSTGRES_CASEGO_PASSWORD
             - name: POSTGRES_DB
               value: casego_db
           resources:

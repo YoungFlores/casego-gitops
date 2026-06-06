@@ -21,10 +21,16 @@ spec:
       containers:
         - name: redis
           image: redis:8-alpine
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: REDIS_PASSWORD
           args:
             - redis-server
             - --requirepass
-            - casego_redis_password
+            - $(REDIS_PASSWORD)
           ports:
             - containerPort: 6379
           resources:
@@ -35,7 +41,10 @@ spec:
               memory: 128Mi
           readinessProbe:
             exec:
-              command: ["redis-cli", "-a", "casego_redis_password", "ping"]
+              command:
+                - sh
+                - -c
+                - redis-cli -a "$REDIS_PASSWORD" ping
             initialDelaySeconds: 5
             periodSeconds: 5
 ---

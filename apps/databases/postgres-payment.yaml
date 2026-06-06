@@ -60,7 +60,10 @@ spec:
             - name: POSTGRES_USER
               value: payment_user
             - name: POSTGRES_PASSWORD
-              value: payment_password
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: POSTGRES_PAYMENT_PASSWORD
             - name: POSTGRES_DB
               value: payment_db
           resources:
