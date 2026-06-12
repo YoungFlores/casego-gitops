@@ -1,0 +1,109 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 30m
+  timeout: 10m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "86.2.2"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      interval: 12h
+  values:
+    # Урезано под маленький кластер (2 ноды 2vCPU/4GB): без Alertmanager,
+    # без persistence, короткий retention.
+    alertmanager:
+      enabled: false
+
+    grafana:
+      adminUser: admin
+      admin:
+        existingSecret: grafana-admin
+        userKey: admin-user
+        passwordKey: admin-password
+      persistence:
+        enabled: false
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+        hosts:
+          - grafana.158-160-192-124.nip.io
+        tls:
+          - secretName: grafana-tls
+            hosts:
+              - grafana.158-160-192-124.nip.io
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 300Mi
+
+    prometheus:
+      prometheusSpec:
+        retention: 6h
+        # Собирать все ServiceMonitor/PodMonitor кластера, а не только свои
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            memory: 1Gi
+      # HTTP-метрики всех сервисов через ingress-nginx (RPS, латентность, 5xx)
+      additionalServiceMonitors:
+        - name: ingress-nginx
+          namespaceSelector:
+            matchNames:
+              - ingress-nginx
+          selector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+              app.kubernetes.io/component: controller
+          endpoints:
+            - port: metrics
+              interval: 30s
+
+    prometheusOperator:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
+
+    kube-state-metrics:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+
+    prometheus-node-exporter:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 32Mi
+        limits:
+          memory: 64Mi
+
+    # Control-plane в Managed K8s недоступен для скрейпа — выключаем,
+    # чтобы не висели вечно-красные таргеты.
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
+    kubeEtcd:
+      enabled: false
