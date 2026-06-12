@@ -1,4 +1,7 @@
 ---
+# Теги вида main-<run_number>-<sha>: run_number из CI монотонно растёт,
+# поэтому numerical-сортировка всегда выбирает реально последний билд.
+# (Старый формат main-<sha> сортировался по алфавиту хэша — выбор был случайным.)
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImagePolicy
 metadata:
@@ -8,10 +11,10 @@ spec:
   imageRepositoryRef:
     name: casego-auth
   filterTags:
-    pattern: '^main-(?P<sha>.+)$'
-    extract: '$sha'
+    pattern: '^main-(?P<run>\d+)-.+$'
+    extract: '$run'
   policy:
-    alphabetical:
+    numerical:
       order: asc
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
@@ -23,10 +26,10 @@ spec:
   imageRepositoryRef:
     name: casego-profile
   filterTags:
-    pattern: '^main-(?P<sha>.+)$'
-    extract: '$sha'
+    pattern: '^main-(?P<run>\d+)-.+$'
+    extract: '$run'
   policy:
-    alphabetical:
+    numerical:
       order: asc
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
@@ -38,10 +41,10 @@ spec:
   imageRepositoryRef:
     name: casego-casego
   filterTags:
-    pattern: '^main-(?P<sha>.+)$'
-    extract: '$sha'
+    pattern: '^main-(?P<run>\d+)-.+$'
+    extract: '$run'
   policy:
-    alphabetical:
+    numerical:
       order: asc
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
@@ -53,10 +56,10 @@ spec:
   imageRepositoryRef:
     name: casego-caseprofile
   filterTags:
-    pattern: '^main-(?P<sha>.+)$'
-    extract: '$sha'
+    pattern: '^main-(?P<run>\d+)-.+$'
+    extract: '$run'
   policy:
-    alphabetical:
+    numerical:
       order: asc
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
@@ -68,8 +71,8 @@ spec:
   imageRepositoryRef:
     name: casego-payment
   filterTags:
-    pattern: '^main-(?P<sha>.+)$'
-    extract: '$sha'
+    pattern: '^main-(?P<run>\d+)-.+$'
+    extract: '$run'
   policy:
-    alphabetical:
+    numerical:
       order: asc

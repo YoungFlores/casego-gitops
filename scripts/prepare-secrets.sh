@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
-# Generate RSA keys, build K8s Secret YAMLs from local .env files,
-# SOPS-encrypt them into apps/secrets/.
+# Generate RSA keys, build K8s Secret YAMLs from local .env files and the
+# backend repo's certs/, SOPS-encrypt them into apps/secrets/.
 #
-# Idempotent: keys are cached in ~/.cache/casego-secrets/.
-# Run after editing ~/Case_go/CaseGo/*/.env or to refresh secrets.
+# TLS certs are NOT generated here: the canonical mTLS set (single CA,
+# SANs payment-service/profile-service expected by the Go code) lives in
+# the backend repo at certs/. We only package it.
+#
+# Idempotent: RSA keys are cached in ~/.cache/casego-secrets/.
+# Run after editing ~/Case_go/CaseGo/*/.env or rotating certs.
 
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SECRETS_DIR="$REPO_DIR/apps/secrets"
 CACHE_DIR="$HOME/.cache/casego-secrets"
-AUTH_ENV="${AUTH_ENV:-$HOME/Case_go/CaseGo/Auth/.env}"
-CASEGO_ENV="${CASEGO_ENV:-$HOME/Case_go/CaseGo/CaseGo/.env}"
+AUTH_ENV="${AUTH_ENV:-$HOME/CaseGo/CaseGo/Auth/.env}"
+CASEGO_ENV="${CASEGO_ENV:-$HOME/CaseGo/CaseGo/CaseGo/.env}"
+CERTS_DIR="${CERTS_DIR:-$HOME/CaseGo/CaseGo/certs}"
 
 mkdir -p "$CACHE_DIR" "$SECRETS_DIR"
 
@@ -22,36 +27,9 @@ if [ ! -f "$CACHE_DIR/private.pem" ]; then
   chmod 600 "$CACHE_DIR/private.pem"
 fi
 
-if [ ! -f "$CACHE_DIR/ca.crt" ]; then
-  echo "▶ Generating gRPC TLS certs (CaseGo ↔ Payment)"
-  pushd "$CACHE_DIR" >/dev/null
-  openssl genrsa -out ca.key 4096 2>/dev/null
-  openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -out ca.crt \
-    -subj "/CN=CaseGoCA" 2>/dev/null
-  openssl genrsa -out payment.key 2048 2>/dev/null
-  openssl req -new -key payment.key -out payment.csr -subj "/CN=payment" 2>/dev/null
-  cat > payment.ext <<EOF
-authorityKeyIdentifier=keyid,issuer
-basicConstraints=CA:FALSE
-keyUsage = digitalSignature, keyEncipherment
-subjectAltName = @alt_names
-[alt_names]
-DNS.1 = localhost
-DNS.2 = payment
-DNS.3 = payment.casego-apps.svc.cluster.local
-IP.1 = 127.0.0.1
-EOF
-  openssl x509 -req -in payment.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
-    -out payment.crt -days 365 -sha256 -extfile payment.ext 2>/dev/null
-  openssl genrsa -out general-client.key 2048 2>/dev/null
-  openssl req -new -key general-client.key -out general-client.csr \
-    -subj "/CN=internal-microservice" 2>/dev/null
-  openssl x509 -req -in general-client.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
-    -out general-client.crt -days 365 -sha256 2>/dev/null
-  rm -f *.csr *.ext *.srl ca.key
-  chmod 600 *.key
-  popd >/dev/null
-fi
+for f in ca.crt payment.crt payment.key general-client.crt general-client.key profile.crt profile.key; do
+  [ -f "$CERTS_DIR/$f" ] || { echo "✗ $CERTS_DIR/$f not found — задай CERTS_DIR (путь к certs/ бэк-репо)"; exit 1; }
+done
 
 get_env() {
   local file="$1" key="$2"
@@ -133,11 +111,11 @@ metadata:
 type: Opaque
 stringData:
   ca.crt: |
-$(sed 's/^/    /' "$CACHE_DIR/ca.crt")
+$(sed 's/^/    /' "$CERTS_DIR/ca.crt")
   payment.crt: |
-$(sed 's/^/    /' "$CACHE_DIR/payment.crt")
+$(sed 's/^/    /' "$CERTS_DIR/payment.crt")
   payment.key: |
-$(sed 's/^/    /' "$CACHE_DIR/payment.key")
+$(sed 's/^/    /' "$CERTS_DIR/payment.key")
 EOF
 
 cat > "$TMP/payment-client-tls.yaml" <<EOF
@@ -149,11 +127,43 @@ metadata:
 type: Opaque
 stringData:
   ca.crt: |
-$(sed 's/^/    /' "$CACHE_DIR/ca.crt")
+$(sed 's/^/    /' "$CERTS_DIR/ca.crt")
   general-client.crt: |
-$(sed 's/^/    /' "$CACHE_DIR/general-client.crt")
+$(sed 's/^/    /' "$CERTS_DIR/general-client.crt")
   general-client.key: |
-$(sed 's/^/    /' "$CACHE_DIR/general-client.key")
+$(sed 's/^/    /' "$CERTS_DIR/general-client.key")
+EOF
+
+cat > "$TMP/profile-server-tls.yaml" <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: profile-server-tls
+  namespace: casego-apps
+type: Opaque
+stringData:
+  ca.crt: |
+$(sed 's/^/    /' "$CERTS_DIR/ca.crt")
+  profile.crt: |
+$(sed 's/^/    /' "$CERTS_DIR/profile.crt")
+  profile.key: |
+$(sed 's/^/    /' "$CERTS_DIR/profile.key")
+EOF
+
+cat > "$TMP/db-credentials.yaml" <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: casego-db-credentials
+  namespace: casego-apps
+type: Opaque
+stringData:
+  POSTGRES_AUTH_PASSWORD: auth_strong_password
+  POSTGRES_CASEGO_PASSWORD: casego_password
+  POSTGRES_CASEPROFILE_PASSWORD: caseprofile_password
+  POSTGRES_PAYMENT_PASSWORD: payment_password
+  POSTGRES_PROFILE_PASSWORD: dev_password
+  REDIS_PASSWORD: casego_redis_password
 EOF
 
 cat > "$REPO_DIR/apps/jwt-public-key-configmap.yaml" <<EOF
@@ -166,7 +176,7 @@ data:
   PUBLIC_KEY: "${PUBLIC_KEY_ENV}"
 EOF
 
-for f in auth-jwt-keys auth-oauth casego-llm jwt-private-key payment-server-tls payment-client-tls; do
+for f in auth-jwt-keys auth-oauth casego-llm jwt-private-key payment-server-tls payment-client-tls profile-server-tls db-credentials; do
   echo "▶ SOPS-encrypting $f.yaml"
   cp "$TMP/$f.yaml" "$SECRETS_DIR/$f.yaml"
   sops --encrypt --in-place "$SECRETS_DIR/$f.yaml"

@@ -42,6 +42,8 @@ spec:
                 configMapKeyRef:
                   name: jwt-public-key
                   key: PUBLIC_KEY
+            - name: GIN_MODE
+              value: release
           volumeMounts:
             - name: tls
               mountPath: /app/certs

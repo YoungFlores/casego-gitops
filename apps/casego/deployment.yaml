@@ -44,10 +44,14 @@ spec:
                 secretKeyRef:
                   name: casego-db-credentials
                   key: REDIS_PASSWORD
-            - name: GRPC_SEVER
+            - name: GRPC_SERVER
               value: caseprofile:50051
             - name: PAYMENT_GRPC_SERVER
               value: payment:50052
+            - name: LEVEL_GRPC_SERVER
+              value: profile:50053
+            - name: GIN_MODE
+              value: release
             - name: PUBLIC_KEY
               valueFrom:
                 configMapKeyRef:

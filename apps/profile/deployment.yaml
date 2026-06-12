@@ -21,6 +21,8 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - name: grpc
+              containerPort: 50053
           env:
             - name: POSTGRES_HOST
               value: postgres-profile
@@ -40,6 +42,8 @@ spec:
                 configMapKeyRef:
                   name: jwt-public-key
                   key: PUBLIC_KEY
+            - name: GIN_MODE
+              value: release
           resources:
             requests:
               cpu: 30m
