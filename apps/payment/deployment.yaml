@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: payment
-          image: ghcr.io/sewaustav/casego-payment:main-16-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-payment"}
+          image: ghcr.io/sewaustav/casego-payment:main-17-95c915d386ac48dfaa89a2974d3cbd04d8b238c3 # {"$imagepolicy": "flux-system:casego-payment"}
           imagePullPolicy: Always
           ports:
             - name: http
