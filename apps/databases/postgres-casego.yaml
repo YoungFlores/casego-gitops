@@ -14,7 +14,8 @@ data:
         description TEXT NOT NULL,
         first_question TEXT NOT NULL,
         creator BIGINT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+        created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+        xp INT NULL DEFAULT 100
     );
 
     CREATE TABLE dialogs (
