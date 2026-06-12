@@ -19,6 +19,8 @@ spec:
         - name: migrate
           image: ghcr.io/sewaustav/casego-auth:main-26-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-auth"}
           command: ["alembic", "upgrade", "head"]
+          # Settings (pydantic) валидируется целиком при импорте alembic env.py,
+          # поэтому нужны все обязательные поля, не только POSTGRES_*
           env:
             - name: POSTGRES_HOST
               value: postgres-auth
@@ -33,6 +35,21 @@ spec:
                   key: POSTGRES_AUTH_PASSWORD
             - name: POSTGRES_DB
               value: auth_db
+            - name: REDIS_HOST
+              value: redis-casego
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_DB
+              value: "0"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: REDIS_PASSWORD
+            - name: CORS_ORIGINS
+              value: "*"
+            - name: JWT_ALG
+              value: RS256
           envFrom:
             - secretRef:
                 name: auth-oauth
