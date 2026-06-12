@@ -43,9 +43,11 @@ spec:
       resources:
         requests:
           cpu: 50m
-          memory: 128Mi
+          memory: 192Mi
         limits:
-          memory: 300Mi
+          # 300Mi оказалось мало — Grafana ловила OOMKilled на старте
+          # при загрузке дашбордов стека
+          memory: 512Mi
 
     prometheus:
       prometheusSpec:
