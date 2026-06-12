@@ -14,6 +14,29 @@ spec:
       labels:
         app: profile
     spec:
+      initContainers:
+        - name: copy-migrations
+          # у profile финальный WORKDIR /root, миграции лежат там
+          image: ghcr.io/sewaustav/casego-profile:main-38-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-profile"}
+          command: ["sh", "-c", "cp -r /root/migrations/. /m/"]
+          volumeMounts:
+            - name: migrations
+              mountPath: /m
+        - name: migrate
+          image: migrate/migrate:v4.19.1
+          args:
+            - -path=/m
+            - -database=postgres://dev_user:$(POSTGRES_PASSWORD)@postgres-profile:5432/app_db?sslmode=disable
+            - up
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: POSTGRES_PROFILE_PASSWORD
+          volumeMounts:
+            - name: migrations
+              mountPath: /m
       containers:
         - name: profile
           image: ghcr.io/sewaustav/casego-profile:main-38-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-profile"}
@@ -63,3 +86,5 @@ spec:
         - name: tls
           secret:
             secretName: profile-server-tls
+        - name: migrations
+          emptyDir: {}

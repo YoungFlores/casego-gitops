@@ -1,73 +1,5 @@
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: postgres-profile-init
-  namespace: casego-apps
-data:
-  init.sql: |
-    CREATE TABLE profiles (
-        id BIGSERIAL PRIMARY KEY,
-        user_id BIGINT NOT NULL UNIQUE,
-        avatar TEXT NOT NULL DEFAULT '',
-        is_active BOOLEAN NOT NULL DEFAULT TRUE,
-        description TEXT NOT NULL DEFAULT '',
-        username VARCHAR(255) NOT NULL UNIQUE,
-        name VARCHAR(255) NOT NULL,
-        surname VARCHAR(255) NOT NULL,
-        patronymic VARCHAR(255),
-        city VARCHAR(255),
-        age INTEGER,
-        sex SMALLINT,
-        profession VARCHAR(255),
-        case_count INTEGER NOT NULL DEFAULT 0,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE user_social_links (
-        id BIGSERIAL PRIMARY KEY,
-        user_id BIGINT NOT NULL,
-        type VARCHAR(100) NOT NULL,
-        url TEXT NOT NULL,
-        CONSTRAINT fk_user_profile FOREIGN KEY (user_id) REFERENCES profiles(user_id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE user_purposes (
-        id BIGSERIAL PRIMARY KEY,
-        user_id BIGINT NOT NULL,
-        purpose TEXT NOT NULL,
-        CONSTRAINT fk_user_profile_purpose FOREIGN KEY (user_id) REFERENCES profiles(user_id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE users_categories (
-        user_id BIGINT NOT NULL,
-        category_id SMALLINT NOT NULL,
-        CONSTRAINT fk_user_profile_category FOREIGN KEY (user_id) REFERENCES profiles(user_id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE categories (
-        id SMALLSERIAL PRIMARY KEY,
-        parent_id SMALLINT REFERENCES categories(id) ON DELETE CASCADE,
-        name VARCHAR(255) NOT NULL
-    );
-
-    CREATE TABLE levels (
-        id SERIAL PRIMARY KEY,
-        user_id BIGINT NOT NULL UNIQUE,
-        xp INT NOT NULL DEFAULT 0,
-        streak INT NOT NULL DEFAULT 0,
-        level INT NOT NULL DEFAULT 1,
-        last_active TIMESTAMP WITH TIME ZONE
-    );
-    CREATE INDEX idx_levels_user_id ON levels (user_id);
-
-    CREATE INDEX idx_profiles_user_id ON profiles(user_id);
-    CREATE INDEX idx_social_links_user_id ON user_social_links(user_id);
-    CREATE INDEX idx_purposes_user_id ON user_purposes(user_id);
-    CREATE INDEX idx_users_categories_cat_id ON users_categories(category_id);
-    CREATE INDEX idx_users_categories_user_id ON users_categories(user_id);
----
+# Схему создают миграции profile (initContainer migrate/migrate), init.sql не нужен
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -116,14 +48,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
-            - name: init
-              mountPath: /docker-entrypoint-initdb.d
       volumes:
         - name: data
           emptyDir: {}
-        - name: init
-          configMap:
-            name: postgres-profile-init
 ---
 apiVersion: v1
 kind: Service

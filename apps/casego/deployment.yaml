@@ -14,6 +14,29 @@ spec:
       labels:
         app: casego
     spec:
+      initContainers:
+        # Миграции как на VPS (migrate/migrate), файлы берутся из образа сервиса
+        - name: copy-migrations
+          image: ghcr.io/sewaustav/casego-casego:main-57-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-casego"}
+          command: ["sh", "-c", "cp -r /app/migrations/. /m/"]
+          volumeMounts:
+            - name: migrations
+              mountPath: /m
+        - name: migrate
+          image: migrate/migrate:v4.19.1
+          args:
+            - -path=/m
+            - -database=postgres://casego_user:$(POSTGRES_PASSWORD)@postgres-casego:5432/casego_db?sslmode=disable
+            - up
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: POSTGRES_CASEGO_PASSWORD
+          volumeMounts:
+            - name: migrations
+              mountPath: /m
       containers:
         - name: casego
           image: ghcr.io/sewaustav/casego-casego:main-57-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-casego"}
@@ -93,3 +116,5 @@ spec:
         - name: payment-tls
           secret:
             secretName: payment-client-tls
+        - name: migrations
+          emptyDir: {}

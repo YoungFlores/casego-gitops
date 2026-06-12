@@ -14,6 +14,28 @@ spec:
       labels:
         app: payment
     spec:
+      initContainers:
+        - name: copy-migrations
+          image: ghcr.io/sewaustav/casego-payment:main-17-95c915d386ac48dfaa89a2974d3cbd04d8b238c3 # {"$imagepolicy": "flux-system:casego-payment"}
+          command: ["sh", "-c", "cp -r /app/migrations/. /m/"]
+          volumeMounts:
+            - name: migrations
+              mountPath: /m
+        - name: migrate
+          image: migrate/migrate:v4.19.1
+          args:
+            - -path=/m
+            - -database=postgres://payment_user:$(POSTGRES_PASSWORD)@postgres-payment:5432/payment_db?sslmode=disable
+            - up
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: POSTGRES_PAYMENT_PASSWORD
+          volumeMounts:
+            - name: migrations
+              mountPath: /m
       containers:
         - name: payment
           image: ghcr.io/sewaustav/casego-payment:main-17-95c915d386ac48dfaa89a2974d3cbd04d8b238c3 # {"$imagepolicy": "flux-system:casego-payment"}
@@ -63,3 +85,5 @@ spec:
         - name: tls
           secret:
             secretName: payment-server-tls
+        - name: migrations
+          emptyDir: {}

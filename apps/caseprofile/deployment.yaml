@@ -14,6 +14,28 @@ spec:
       labels:
         app: caseprofile
     spec:
+      initContainers:
+        - name: copy-migrations
+          image: ghcr.io/sewaustav/casego-caseprofile:main-32-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-caseprofile"}
+          command: ["sh", "-c", "cp -r /app/migrations/. /m/"]
+          volumeMounts:
+            - name: migrations
+              mountPath: /m
+        - name: migrate
+          image: migrate/migrate:v4.19.1
+          args:
+            - -path=/m
+            - -database=postgres://caseprofile_user:$(POSTGRES_PASSWORD)@postgres-caseprofile:5432/caseprofile_db?sslmode=disable
+            - up
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: POSTGRES_CASEPROFILE_PASSWORD
+          volumeMounts:
+            - name: migrations
+              mountPath: /m
       containers:
         - name: caseprofile
           image: ghcr.io/sewaustav/casego-caseprofile:main-32-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-caseprofile"}
@@ -67,3 +89,6 @@ spec:
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
+      volumes:
+        - name: migrations
+          emptyDir: {}

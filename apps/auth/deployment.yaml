@@ -14,6 +14,28 @@ spec:
       labels:
         app: auth
     spec:
+      initContainers:
+        # Alembic-миграции из образа самого сервиса (как auth-migrate в compose)
+        - name: migrate
+          image: ghcr.io/sewaustav/casego-auth:main-26-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-auth"}
+          command: ["alembic", "upgrade", "head"]
+          env:
+            - name: POSTGRES_HOST
+              value: postgres-auth
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: auth_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: casego-db-credentials
+                  key: POSTGRES_AUTH_PASSWORD
+            - name: POSTGRES_DB
+              value: auth_db
+          envFrom:
+            - secretRef:
+                name: auth-oauth
       containers:
         - name: auth
           image: ghcr.io/sewaustav/casego-auth:main-26-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-auth"}
