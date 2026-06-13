@@ -16,7 +16,7 @@ spec:
     spec:
       initContainers:
         - name: copy-migrations
-          image: ghcr.io/sewaustav/casego-caseprofile:main-32-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-caseprofile"}
+          image: ghcr.io/sewaustav/casego-caseprofile:main-1781351499-bed3ed1aeb27d9d4a5f5da524b63d597d8b603e3 # {"$imagepolicy": "flux-system:casego-caseprofile"}
           command: ["sh", "-c", "cp -r /app/migrations/. /m/"]
           volumeMounts:
             - name: migrations
@@ -38,7 +38,7 @@ spec:
               mountPath: /m
       containers:
         - name: caseprofile
-          image: ghcr.io/sewaustav/casego-caseprofile:main-32-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-caseprofile"}
+          image: ghcr.io/sewaustav/casego-caseprofile:main-1781351499-bed3ed1aeb27d9d4a5f5da524b63d597d8b603e3 # {"$imagepolicy": "flux-system:casego-caseprofile"}
           imagePullPolicy: Always
           ports:
             - name: http

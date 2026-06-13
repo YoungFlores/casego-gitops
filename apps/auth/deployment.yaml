@@ -17,7 +17,7 @@ spec:
       initContainers:
         # Alembic-миграции из образа самого сервиса (как auth-migrate в compose)
         - name: migrate
-          image: ghcr.io/sewaustav/casego-auth:main-26-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-auth"}
+          image: ghcr.io/sewaustav/casego-auth:main-1781351505-bed3ed1aeb27d9d4a5f5da524b63d597d8b603e3 # {"$imagepolicy": "flux-system:casego-auth"}
           command: ["alembic", "upgrade", "head"]
           # Settings (pydantic) валидируется целиком при импорте alembic env.py,
           # поэтому нужны все обязательные поля, не только POSTGRES_*
@@ -55,7 +55,7 @@ spec:
                 name: auth-oauth
       containers:
         - name: auth
-          image: ghcr.io/sewaustav/casego-auth:main-26-036430e2a03b2dd12a9f57858471fc301707b7e7 # {"$imagepolicy": "flux-system:casego-auth"}
+          image: ghcr.io/sewaustav/casego-auth:main-1781351505-bed3ed1aeb27d9d4a5f5da524b63d597d8b603e3 # {"$imagepolicy": "flux-system:casego-auth"}
           imagePullPolicy: Always
           ports:
             - name: http
