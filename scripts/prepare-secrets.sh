@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
-# Generate RSA keys, build K8s Secret YAMLs from local .env files and the
-# backend repo's certs/, SOPS-encrypt them into apps/secrets/.
-#
-# TLS certs are NOT generated here: the canonical mTLS set (single CA,
-# SANs payment-service/profile-service expected by the Go code) lives in
-# the backend repo at certs/. We only package it.
-#
-# Idempotent: RSA keys are cached in ~/.cache/casego-secrets/.
-# Run after editing ~/Case_go/CaseGo/*/.env or rotating certs.
+# Generate RSA keys, build K8s Secret YAMLs from local .env files and the backend repo's certs/, SOPS-encrypt them into apps/secrets/.
 
 set -euo pipefail
 

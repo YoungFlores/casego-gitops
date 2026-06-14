@@ -1,7 +1,4 @@
 ---
-# Теги вида main-<run_number>-<sha>: run_number из CI монотонно растёт,
-# поэтому numerical-сортировка всегда выбирает реально последний билд.
-# (Старый формат main-<sha> сортировался по алфавиту хэша — выбор был случайным.)
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImagePolicy
 metadata:

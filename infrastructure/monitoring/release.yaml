@@ -16,8 +16,7 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
-    # Урезано под маленький кластер (2 ноды 2vCPU/4GB): без Alertmanager,
-    # без persistence, короткий retention.
+
     alertmanager:
       enabled: false
 
@@ -45,14 +44,11 @@ spec:
           cpu: 50m
           memory: 192Mi
         limits:
-          # 300Mi оказалось мало — Grafana ловила OOMKilled на старте
-          # при загрузке дашбордов стека
           memory: 512Mi
 
     prometheus:
       prometheusSpec:
         retention: 6h
-        # Собирать все ServiceMonitor/PodMonitor кластера, а не только свои
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
         resources:
@@ -61,7 +57,6 @@ spec:
             memory: 512Mi
           limits:
             memory: 1Gi
-      # HTTP-метрики всех сервисов через ingress-nginx (RPS, латентность, 5xx)
       additionalServiceMonitors:
         - name: ingress-nginx
           namespaceSelector:
@@ -99,8 +94,6 @@ spec:
         limits:
           memory: 64Mi
 
-    # Control-plane в Managed K8s недоступен для скрейпа — выключаем,
-    # чтобы не висели вечно-красные таргеты.
     kubeControllerManager:
       enabled: false
     kubeScheduler:

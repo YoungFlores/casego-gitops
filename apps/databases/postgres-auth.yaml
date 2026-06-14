@@ -1,5 +1,4 @@
 ---
-# Схему создаёт alembic (initContainer в деплойменте auth), init.sql не нужен
 apiVersion: apps/v1
 kind: Deployment
 metadata:

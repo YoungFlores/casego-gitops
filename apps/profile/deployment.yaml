@@ -16,7 +16,6 @@ spec:
     spec:
       initContainers:
         - name: copy-migrations
-          # у profile финальный WORKDIR /root, миграции лежат там
           image: ghcr.io/sewaustav/casego-profile:main-1781351504-bed3ed1aeb27d9d4a5f5da524b63d597d8b603e3 # {"$imagepolicy": "flux-system:casego-profile"}
           command: ["sh", "-c", "cp -r /root/migrations/. /m/"]
           volumeMounts:

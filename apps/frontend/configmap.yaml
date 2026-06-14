@@ -4,9 +4,6 @@ metadata:
   name: frontend-nginx
   namespace: casego-apps
 data:
-  # K8s-вариант конфига: подменяет запечённый в образе VPS-конфиг
-  # (тот слушает 443 с letsencrypt-сертами хоста и ходит в docker-имена).
-  # Здесь TLS терминируется на ingress-nginx, апстримы — k8s-сервисы.
   default.conf: |
     server {
         listen 80;
@@ -46,8 +43,6 @@ data:
             proxy_set_header X-Real-IP $remote_addr;
         }
 
-        # index.html и service worker — всегда свежие, иначе PWA живёт
-        # на старой версии пока вручную не сбросят кэш.
         location = /index.html {
             add_header Cache-Control "no-store, no-cache, must-revalidate" always;
             try_files $uri =404;
@@ -58,7 +53,6 @@ data:
             try_files $uri =404;
         }
 
-        # Ассеты с хешем в имени — кэшировать надолго.
         location ~* \.(js|css|wasm|woff2?|ttf|otf|png|jpg|jpeg|svg|ico)$ {
             expires 1y;
             add_header Cache-Control "public, immutable" always;

@@ -28,8 +28,6 @@ spec:
           memory: 128Mi
         limits:
           memory: 256Mi
-      # Метрики для Prometheus (ServiceMonitor создаёт kube-prometheus-stack,
-      # чтобы не зависеть от порядка установки CRD)
       metrics:
         enabled: true
       admissionWebhooks:

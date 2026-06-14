@@ -63,9 +63,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: jwt-public-key
-                  key: PUBLIC_KEY
-            # Auth и CaseGo сейчас подписывают одним keypair'ом, поэтому оба
-            # ключа берутся из одного ConfigMap. Разъедутся ключи — разнести.
+                  key: PUBLIC_KEY        
             - name: AUTH_PUBLIC_KEY
               valueFrom:
                 configMapKeyRef:

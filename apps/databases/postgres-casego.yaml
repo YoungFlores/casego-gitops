@@ -1,5 +1,4 @@
 ---
-# Схему создают миграции casego (initContainer migrate/migrate), init.sql не нужен
 apiVersion: apps/v1
 kind: Deployment
 metadata:

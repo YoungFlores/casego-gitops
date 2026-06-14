@@ -15,7 +15,6 @@ spec:
         app: casego
     spec:
       initContainers:
-        # Миграции как на VPS (migrate/migrate), файлы берутся из образа сервиса
         - name: copy-migrations
           image: ghcr.io/sewaustav/casego-casego:main-1781351506-bed3ed1aeb27d9d4a5f5da524b63d597d8b603e3 # {"$imagepolicy": "flux-system:casego-casego"}
           command: ["sh", "-c", "cp -r /app/migrations/. /m/"]
