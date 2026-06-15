@@ -1,0 +1,228 @@
+---
+# Default-deny: by default no ingress is allowed into casego-apps pods.
+# Every flow below must be explicitly allow-listed.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: casego-apps
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# DNS egress: every pod must be able to resolve k8s service names.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: casego-apps
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+---
+# Ingress NGINX may reach every app that has a public-facing Ingress.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-ingress-nginx
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchExpressions:
+      - { key: app, operator: In, values: [frontend, auth, profile, casego, caseprofile, payment] }
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+---
+# Frontend nginx proxies to backend HTTP ports.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backends
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchExpressions:
+      - { key: app, operator: In, values: [auth, profile, casego, caseprofile] }
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - { protocol: TCP, port: 8000 }
+        - { protocol: TCP, port: 8080 }
+        - { protocol: TCP, port: 8081 }
+        - { protocol: TCP, port: 8082 }
+---
+# CaseGo opens gRPC to payment / profile (level) / caseprofile.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-casego-grpc-fanout
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchExpressions:
+      - { key: app, operator: In, values: [payment, profile, caseprofile] }
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: casego
+      ports:
+        - { protocol: TCP, port: 50051 }
+        - { protocol: TCP, port: 50052 }
+        - { protocol: TCP, port: 50053 }
+---
+# Each app pod talks only to its own Postgres.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-auth-to-postgres
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-auth
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: auth
+      ports:
+        - { protocol: TCP, port: 5432 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-profile-to-postgres
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-profile
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: profile
+      ports:
+        - { protocol: TCP, port: 5432 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-casego-to-postgres
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-casego
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: casego
+      ports:
+        - { protocol: TCP, port: 5432 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-caseprofile-to-postgres
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-caseprofile
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: caseprofile
+      ports:
+        - { protocol: TCP, port: 5432 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-payment-to-postgres
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-payment
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: payment
+      ports:
+        - { protocol: TCP, port: 5432 }
+---
+# Redis is shared by auth (session store) and casego (cache).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-apps-to-redis
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchLabels:
+      app: redis-casego
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - { key: app, operator: In, values: [auth, casego] }
+      ports:
+        - { protocol: TCP, port: 6379 }
+---
+# Prometheus (monitoring namespace) scrapes app /metrics when ServiceMonitors land.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-monitoring
+  namespace: casego-apps
+spec:
+  podSelector:
+    matchExpressions:
+      - { key: app, operator: In, values: [frontend, auth, profile, casego, caseprofile, payment] }
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring

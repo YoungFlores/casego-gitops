@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - jwt-public-key-configmap.yaml
+  - network-policies.yaml
   - secrets
   - databases
   - auth
