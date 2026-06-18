@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/sewaustav/casego-frontend:main-1781351727-a5a0f73ac61e477e2c2ce6e50b1ff5d97dbaa5c6 # {"$imagepolicy": "flux-system:casego-frontend"}
+          image: ghcr.io/sewaustav/casego-frontend:main-1781439360-e0be3c2eb8d011c3799da1f4d186769b6c380669 # {"$imagepolicy": "flux-system:casego-frontend"}
           imagePullPolicy: Always
           ports:
             - name: http
