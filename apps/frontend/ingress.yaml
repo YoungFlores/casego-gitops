@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - front.158-160-192-124.nip.io
+        - casego.ddns.net
       secretName: frontend-tls
   rules:
-    - host: front.158-160-192-124.nip.io
+    - host: casego.ddns.net
       http:
         paths:
           - path: /
