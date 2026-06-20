@@ -16,7 +16,7 @@ spec:
     spec:
       initContainers:
         - name: migrate
-          image: ghcr.io/sewaustav/casego-auth:main-1781351505-bed3ed1aeb27d9d4a5f5da524b63d597d8b603e3 # {"$imagepolicy": "flux-system:casego-auth"}
+          image: ghcr.io/sewaustav/casego-auth:main-1781964749-36eff90217b1a445e2acfd5cc9f566913dfc17ca # {"$imagepolicy": "flux-system:casego-auth"}
           command: ["alembic", "upgrade", "head"]
           env:
             - name: POSTGRES_HOST
@@ -52,7 +52,7 @@ spec:
                 name: auth-oauth
       containers:
         - name: auth
-          image: ghcr.io/sewaustav/casego-auth:main-1781351505-bed3ed1aeb27d9d4a5f5da524b63d597d8b603e3 # {"$imagepolicy": "flux-system:casego-auth"}
+          image: ghcr.io/sewaustav/casego-auth:main-1781964749-36eff90217b1a445e2acfd5cc9f566913dfc17ca # {"$imagepolicy": "flux-system:casego-auth"}
           imagePullPolicy: Always
           ports:
             - name: http
